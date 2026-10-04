@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tamos Case Hackathon 2026 — Ресторан для людей своего поколения</title>
+<style>
+:root{
+  --bg:#f4f0e8; --paper:#fbfaf6; --ink:#171715; --muted:#77736a;
+  --accent:#e45f35; --line:#d9d3c8; --dark:#20211e;
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);overflow:hidden}
+body{touch-action:pan-y}
+.deck{height:100vh;position:relative}
+.slide{position:absolute;inset:0;display:none;padding:clamp(28px,5vw,72px);overflow:auto}
+.slide.active{display:flex;flex-direction:column}
+.slide.dark{background:var(--dark);color:#f7f4ed}
+.top{display:flex;justify-content:space-between;align-items:center;font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:auto}
+.dark .top{color:#aaa79e}
+.kicker{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:800}
+h1{font-size:clamp(48px,8vw,112px);line-height:.92;letter-spacing:-.065em;margin:18px 0 22px;max-width:1050px}
+h2{font-size:clamp(40px,6vw,78px);line-height:.94;letter-spacing:-.055em;margin:15px 0 25px;max-width:950px}
+h3{font-size:24px;margin:0 0 10px;letter-spacing:-.02em}
+p{font-size:clamp(16px,1.7vw,22px);line-height:1.45;max-width:760px;color:var(--muted)}
+.dark p{color:#bbb8b0}
+.hero{margin:auto 0}
+.hero .lead{font-size:clamp(18px,2vw,27px);max-width:700px}
+.big-question{font-size:clamp(30px,4.5vw,64px);line-height:1.03;letter-spacing:-.04em;max-width:1050px}
+.grid{display:grid;gap:14px}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:24px;min-height:150px}
+.dark .card{background:#292a26;border-color:#3a3b36}
+.card .num{font-size:38px;font-weight:850;letter-spacing:-.05em;margin-bottom:12px}
+.card small,.muted{color:var(--muted)}
+.dark .card small{color:#aaa79e}
+.quote{border-left:4px solid var(--accent);padding:6px 0 6px 18px;font-size:20px;line-height:1.35}
+.stat{font-size:clamp(45px,6vw,86px);font-weight:850;letter-spacing:-.07em;line-height:1}
+.label{font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-top:8px}
+.flow{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;margin:25px 0}
+.flow .step{flex:1;min-width:145px;border:1px solid var(--line);background:var(--paper);border-radius:18px;padding:18px;position:relative}
+.flow .step:not(:last-child)::after{content:"→";position:absolute;right:-17px;top:50%;transform:translateY(-50%);font-size:24px;color:var(--accent);z-index:2}
+.dark .flow .step{background:#292a26;border-color:#3a3b36}
+.timeline{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:10px}
+.phase{padding:22px;border-top:2px solid var(--ink)}
+.dark .phase{border-color:#f7f4ed}
+.phase strong{display:block;font-size:15px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.phase span{font-size:22px;line-height:1.2}
+.placeholder{display:inline-block;background:#fff0ea;border:1px dashed #e7a18b;border-radius:8px;padding:2px 7px;color:#a5482e}
+.photo{border-radius:28px;min-height:260px;background:
+linear-gradient(135deg,rgba(0,0,0,.08),rgba(0,0,0,.35)),
+url("https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&w=1400&q=85") center/cover}
+.phone{width:min(300px,70vw);aspect-ratio:9/18;border:10px solid #171715;border-radius:36px;background:#f8f6ef;box-shadow:0 20px 50px rgba(0,0,0,.18);padding:18px;margin:auto}
+.phone .bar{height:5px;width:60px;border-radius:10px;background:#222;margin:0 auto 18px}
+.phone .screen-card{padding:16px;border-radius:18px;background:#ebe5da;margin:10px 0}
+.phone .screen-card b{font-size:20px}
+.mockup{display:grid;grid-template-columns:1.2fr .8fr;gap:28px;align-items:center;flex:1}
+.social{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
+.social .node{padding:22px;border:1px solid var(--line);border-radius:20px;background:var(--paper)}
+.metric{display:flex;gap:16px;align-items:center;padding:18px 0;border-bottom:1px solid var(--line)}
+.metric .dot{width:12px;height:12px;background:var(--accent);border-radius:50%}
+.nav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;background:rgba(28,29,26,.92);color:white;padding:8px 10px;border-radius:999px;z-index:20;box-shadow:0 10px 30px rgba(0,0,0,.16)}
+.nav button{border:0;background:transparent;color:white;width:38px;height:38px;border-radius:50%;font-size:18px;cursor:pointer}
+.nav button:hover{background:#3b3c37}
+.progress{height:3px;background:#555;width:120px;border-radius:4px;overflow:hidden}
+.progress span{display:block;height:100%;background:var(--accent);width:0}
+.counter{font-size:12px;min-width:45px;text-align:center}
+.notes{position:fixed;right:18px;top:18px;z-index:25}
+.notes button{border:1px solid rgba(0,0,0,.15);background:rgba(251,250,246,.85);backdrop-filter:blur(12px);border-radius:999px;padding:9px 13px;cursor:pointer;font-size:12px}
+.notes-panel{position:fixed;right:18px;top:58px;width:min(380px,calc(100vw - 36px));background:#181916;color:#f7f4ed;border-radius:18px;padding:20px;display:none;z-index:25;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.notes-panel.open{display:block}
+.notes-panel h4{margin:0 0 10px;color:var(--accent);text-transform:uppercase;letter-spacing:.12em;font-size:11px}
+.notes-panel p{font-size:15px;color:#d2cfc7;margin:0}
+.appendix .card{min-height:0}
+.checks{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:18px}
+.check{padding:15px 17px;border:1px solid var(--line);border-radius:15px;background:var(--paper)}
+.check b{color:var(--accent)}
+.footer{margin-top:auto;display:flex;justify-content:space-between;align-items:end;gap:20px}
+.team-names{color:var(--accent);font-weight:800;line-height:1.45;font-size:14px;letter-spacing:.01em;max-width:650px}
+.long-text{max-width:1150px;font-size:clamp(15px,1.45vw,20px);line-height:1.42;color:var(--muted)}
+.problem-text{max-width:1200px;font-size:clamp(17px,1.65vw,23px);line-height:1.5;color:var(--muted)}
+.video-frame{width:100%;aspect-ratio:16/9;border-radius:28px;overflow:hidden;background:#171715;box-shadow:0 18px 50px rgba(0,0,0,.16);margin-top:25px}
+.video-frame iframe{width:100%;height:100%;border:0}
+.idea-list{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px}
+.idea{padding:20px 22px;border:1px solid var(--line);border-radius:20px;background:var(--paper)}
+.contact-box{margin-top:24px;padding:20px 22px;border:1px solid var(--line);border-radius:20px;background:var(--paper)}
+@media(max-width:800px){.idea-list{grid-template-columns:1fr}.team-names{font-size:13px}.problem-text,.long-text{font-size:16px}}
+@media(max-width:800px){
+ .grid-3,.grid-4,.timeline,.mockup,.social,.checks{grid-template-columns:1fr}
+ .slide{padding:25px 20px 90px}
+ .flow .step:not(:last-child)::after{display:none}
+ .photo{min-height:180px}
+ h1{font-size:clamp(44px,13vw,75px)}
+ h2{font-size:clamp(38px,11vw,62px)}
+}
+</style>
+</head>
+<body>
+<div class="deck">
+
+<section class="slide active" data-note="Начните с названия команды и вопроса: почему человек выбирает именно этот ресторан? Затем коротко представьте команду.">
+  <div class="top"><span>TAMOS CASE HACKATHON 2026</span><span>01 / 10</span></div>
+  <div class="hero">
+    <div class="kicker">Ресторан для людей своего поколения</div>
+    <h1>Что заставляет гостя выбрать именно этот ресторан?</h1>
+    <p class="lead">Не новая кнопка. Не ещё одно приложение. Сначала — человек и его вечер.</p>
+  </div>
+  <div class="footer">
+    <div class="team-names">
+      Аимбетов Алидар&nbsp;&nbsp;&nbsp; Селезнева Анжелика<br>
+      Сейтжапар Жанайым&nbsp;&nbsp;&nbsp; Сымбат Мади<br>
+      Уманова Маргарита
+    </div>
+    <span class="kicker">MINDSET</span>
+  </div>
+</section>
+
+<section class="slide" data-note="Этот слайд оставлен без изменений по твоей просьбе. Он задаёт общий контекст: ресторан — это не только еда, но и опыт.">
+  <div class="top"><span>КОНТЕКСТ</span><span>02 / 10</span></div>
+  <div>
+    <div class="kicker">Ресторан — это не только еда</div>
+    <h2>Гость покупает<br>не только блюдо.</h2>
+    <div class="grid grid-3">
+      <div class="card"><div class="num">01</div><h3>Зачем пришёл?</h3><p>Поесть, встретиться, отметить, провести время.</p></div>
+      <div class="card"><div class="num">02</div><h3>Что получил?</h3><p>Еду, атмосферу, эмоции, историю, контакт.</p></div>
+      <div class="card"><div class="num">03</div><h3>Что запомнил?</h3><p>То, что хочется повторить или рассказать другим.</p></div>
+    </div>
+  </div>
+  <div class="footer"><span class="muted">Цель: гостевой опыт + социализация</span></div>
+</section>
+
+<section class="slide" data-note="Здесь начинается первая проблематика. Не перегружайте устным текстом: коротко объясните, что проблема возникает из-за дистанции и отсутствия естественного повода для знакомства.">
+  <div class="top"><span>ПРОБЛЕМАТИКА №1</span><span>03 / 10</span></div>
+  <div class="hero">
+    <div class="kicker">Проблема социального взаимодействия</div>
+    <h2>Ресторан может быть наполнен людьми,<br>но оставаться социально разделённым.</h2>
+    <p class="problem-text">В ресторанах высокого класса строгий этикет и дистанция между гостями и персоналом могут мешать естественному общению и полноценному восприятию атмосферы. Люди приходят в ресторан не только ради еды, но и ради встреч, впечатлений и совместного досуга, однако привычный формат изолирует каждую компанию за своим столом. Гостям, открытым к новым знакомствам и впечатлениям, не хватает естественного способа взаимодействовать с окружающими без неловкости и давления.</p>
+  </div>
+</section>
+
+<section class="slide dark" data-note="Представьте Table Match как решение первой проблемы. Главный принцип: технология только создаёт повод, а контакт происходит исключительно при взаимном согласии.">
+  <div class="top"><span>РЕШЕНИЕ №1</span><span>04 / 10</span></div>
+  <div style="overflow:auto">
+    <div class="kicker">TABLE MATCH</div>
+    <h2>Естественный мост<br>между гостями.</h2>
+    <p class="long-text" style="color:#bbb8b0">Современный ресторан высокого класса — это не только место, где человек получает качественную еду, но и пространство для общения, новых впечатлений и эмоций. Однако строгий этикет и привычная организация пространства часто создают дистанцию между людьми: каждая компания остаётся в рамках своего стола, а незнакомые гости практически не взаимодействуют друг с другом. В результате ресторан может быть наполнен людьми, но при этом оставаться социально «разделённым».</p>
+    <p class="long-text" style="color:#bbb8b0">Table Match — технология, которая создаёт естественный мост между гостями, не заставляя их общаться напрямую. При посещении ресторана гость может выбрать несколько своих интересов — например, кино, музыку, путешествия, спорт или искусство. Система анализирует совпадения между гостями, находящимися в ресторане, и при взаимном согласии предлагает им лёгкий повод для знакомства. Например, если два человека за соседними столами оба интересуются кино, система может предложить им ответить на один общий вопрос: «Какой фильм вы бы хотели забыть и посмотреть снова впервые?» Если оба заинтересованы, они получают возможность продолжить общение уже в реальном пространстве ресторана.</p>
+    <p class="long-text" style="color:#bbb8b0">Главное преимущество Table Match заключается в том, что технология не заменяет человеческое общение, а помогает ему начаться. Гостю не нужно подходить к незнакомому человеку с неловким вопросом, а другой человек не оказывается в ситуации нежелательного знакомства. Каждый контакт происходит только при взаимном согласии, поэтому технология сохраняет приватность и атмосферу ресторана высокого класса.</p>
+    <p class="long-text" style="color:#bbb8b0">Например, человек пришёл в ресторан один и обычно провёл бы весь вечер за своим столом. Благодаря Table Match он может обнаружить другого гостя с похожими интересами и получить простой повод для разговора. В другом случае две компании могут случайно обнаружить общий интерес и принять участие в небольшом совместном вопросе или игре. Так обычный ужин превращается в более запоминающийся социальный опыт.</p>
+    <p class="long-text" style="color:#bbb8b0">Таким образом, Table Match превращает ресторан из пространства, где люди просто находятся рядом, в пространство, где люди могут естественно взаимодействовать. Технология сохраняет комфорт, приватность и высокий уровень сервиса, но одновременно возвращает ресторану то, что часто теряется за строгим этикетом, — живое человеческое общение и возможность создать впечатление не только от еды, но и от людей вокруг.</p>
+  </div>
+</section>
+
+<section class="slide" data-note="На этом слайде просто включите видео, которое вы вставите в код. Все пояснения к интервью можно сказать устно.">
+  <div class="top"><span>ИССЛЕДОВАНИЕ</span><span>05 / 10</span></div>
+  <div class="hero" style="width:100%">
+    <div class="kicker">Видео с опросом</div>
+    <h2>Как проходило наше исследование?</h2>
+    <!-- ВСТАВЬТЕ СЮДА ССЫЛКУ YOUTUBE В ФОРМАТЕ /embed/ -->
+    <div class="video-frame">
+      <iframe src="https://www.youtube.com/embed/XuAH9k_wPa0" title="Опрос гостей" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-note="Здесь переходим ко второй проблематике. Акцент: после еды компании иногда не находят нового занятия и продолжают вечер уже в другом месте.">
+  <div class="top"><span>ПРОБЛЕМАТИКА №2</span><span>06 / 10</span></div>
+  <div class="hero">
+    <div class="kicker">Проблема продолжения досуга</div>
+    <h2>Ужин заканчивается —<br>и вместе с ним заканчивается сценарий вечера.</h2>
+    <p class="problem-text">Компании друзей, которые приходят в ресторан ради совместного времяпрепровождения, после еды иногда не находят нового занятия внутри заведения и уходят в другое место. Из-за этого ресторан может не становиться полноценной частью их досуга и не получать дополнительного повода для повторного посещения.</p>
+  </div>
+</section>
+
+<section class="slide dark" data-note="Покажите SoundTable как отдельное решение второй проблемы. Подчеркните: браузер, смартфоны и личные наушники — ресторану не требуется специальное оборудование.">
+  <div class="top"><span>РЕШЕНИЕ №2</span><span>07 / 10</span></div>
+  <div>
+    <div class="kicker">SOUNDTABLE</div>
+    <h2>P2P-платформа<br>синхронизированного аудио-театра.</h2>
+    <p class="long-text" style="color:#bbb8b0">Технология представляет собой легкий веб-сервис, работающий прямо в браузере смартфона без установки сторонних приложений. Специальный программный алгоритм связывает устройства гостей за одним столом и синхронизирует воспроизведение аудиофайлов с точностью до миллисекунды.</p>
+    <p class="long-text" style="color:#bbb8b0">Система автоматически распределяет роли и направляет индивидуальные аудиопотоки каждому игроку. Ресторану не нужно покупать оборудование, менять интерьер, шумные колонки или обучать персонал — вся технологическая система работает на смартфонах и наушниках самих посетителей через печатные QR-стойки.</p>
+    <div class="flow">
+      <div class="step"><b>QR-код</b><br><small>Гости сканируют его со смартфона.</small></div>
+      <div class="step"><b>Роли</b><br><small>Каждый получает свой аудиопоток.</small></div>
+      <div class="step"><b>Синхронизация</b><br><small>История развивается одновременно.</small></div>
+      <div class="step"><b>Обсуждение</b><br><small>Гости снимают наушники и продолжают игру вместе.</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-note="Проведите жюри по сценарию глазами одного посетителя: ужин закончился → QR → роли → аудио → обсуждение → дополнительный заказ → повод вернуться.">
+  <div class="top"><span>СЦЕНАРИЙ ГОСТЯ</span><span>08 / 10</span></div>
+  <div>
+    <div class="kicker">От завершения ужина до полного погружения в игру</div>
+    <h2>Один стол превращается<br>в игровую сцену.</h2>
+    <p class="problem-text">Официант убирает основные блюда, и гости замечают на столе лаконичную карточку с предложением запустить аудио-квест. Члены компании сканируют QR-код на своих смартфонах, надевают личные Bluetooth-наушники и объединяются в одну виртуальную комнату.</p>
+    <p class="problem-text">Каждый участник получает в наушники уникальную роль, тайную информацию и индивидуальные вводные. Через пару минут все снимают наушники и начинают бурно обсуждать полученные улики, спорить и разгадывать завязанную историю. По ходу игры компания естественным образом дозаказывает чай и десерты, а финал первой главы на самом интересном месте мотивирует их забронировать этот же стол на следующие выходные.</p>
+    <div class="flow">
+      <div class="step"><b>QR</b><br><small>Запуск</small></div>
+      <div class="step"><b>Роль</b><br><small>Персональная информация</small></div>
+      <div class="step"><b>Аудио</b><br><small>Погружение</small></div>
+      <div class="step"><b>Обсуждение</b><br><small>Совместная игра</small></div>
+      <div class="step"><b>Продолжение</b><br><small>Дозаказ + повторный визит</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide dark"
+data-note="На этом слайде расскажите, какие финансовые, кадровые и технические ресурсы нужны для реализации обеих идей.">
+
+    <div class="top">
+        <span>РЕСУРСЫ И МАСШТАБИРОВАНИЕ</span>
+        <span>09 / 10</span>
+    </div>
+
+    <div>
+
+        <div class="kicker">
+            Что потребуется для запуска?
+        </div>
+
+        <h2>
+            Финансы, люди<br>
+            и инфраструктура.
+        </h2>
+
+        <div class="grid grid-2">
+
+            <!-- TABLE MATCH -->
+
+            <div class="card">
+
+                <div class="num">01</div>
+
+                <h3>
+                    Table Match
+                </h3>
+
+                <p>
+                    <b>Финансовые нужды:</b>
+                    разработка веб-системы, серверная инфраструктура,
+                    база данных, защита персональных данных,
+                    тестирование и техническая поддержка.
+                </p>
+
+                <p>
+                    <b>Кадры:</b>
+                    frontend/backend-разработчик,
+                    UX/UI-дизайнер, специалист по информационной
+                    безопасности и проектный менеджер.
+                </p>
+
+                <p>
+                    <b>Что понадобится ресторану:</b>
+                    планшет или компьютер/экран администратора
+                    или хостес, стабильный Wi-Fi и QR-карточки
+                    или QR-стойки на столах.
+                </p>
+
+            </div>
+
+
+            <!-- SOUNDTABLE -->
+
+            <div class="card">
+
+                <div class="num">02</div>
+
+                <h3>
+                    SoundTable
+                </h3>
+
+                <p>
+                    <b>Финансовые нужды:</b>
+                    разработка P2P-платформы, серверная часть,
+                    создание и запись аудио-квестов,
+                    тестирование синхронизации
+                    и техническая поддержка.
+                </p>
+
+                <p>
+                    <b>Кадры:</b>
+                    разработчик, специалист по аудио и синхронизации,
+                    сценарист или звукорежиссёр, UX/UI-дизайнер
+                    и проектный менеджер.
+                </p>
+
+                <p>
+                    <b>Что понадобится ресторану:</b>
+                    смартфоны и Bluetooth-наушники самих посетителей,
+                    QR-стойки или карточки на столах
+                    и стабильный Wi-Fi.
+                </p>
+
+                <p>
+                    <b>Важно:</b>
+                    телевизоры, колонки и специальное оборудование
+                    для каждого стола не обязательны.
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="flow">
+
+            <div class="step">
+                <b>Разработка</b><br>
+                <small>
+                    Создание и тестирование платформ
+                </small>
+            </div>
+
+            <div class="step">
+                <b>Контент</b><br>
+                <small>
+                    Сценарии, вопросы и аудио-игры
+                </small>
+            </div>
+
+            <div class="step">
+                <b>Кадры</b><br>
+                <small>
+                    IT, дизайн и контент
+                </small>
+            </div>
+
+            <div class="step">
+                <b>Ресторан</b><br>
+                <small>
+                    Wi-Fi + планшет/экран + QR
+                </small>
+            </div>
+
+        </div>
+
+        <p style="font-size:13px;">
+            Точные суммы бюджета рассчитываются после определения
+            количества столов, состава команды и масштаба пилотного запуска.
+        </p>
+
+    </div>
+
+</section>
+
+<section class="slide" data-note="Финал. Каждая идея — одной фразой. Затем при необходимости покажите прототип и назовите команду и контакты.">
+  <div class="top"><span>ФИНАЛ</span><span>10 / 10</span></div>
+  <div>
+    <div class="kicker">Каждая идея — одной фразой</div>
+    <div class="idea-list">
+      <div class="idea"><b>Table Match</b><p>Помогает гостям находить естественный повод для общения с людьми рядом — без давления и только при взаимном согласии.</p></div>
+      <div class="idea"><b>SoundTable</b><p>Превращает завершение ужина в синхронизированный аудио-квест, который продолжает вечер прямо за столом.</p></div>
+    </div>
+    
+    <div class="contact-box">
+
+    <div class="kicker" style="font-size:11px">
+        КОМАНДА И КОНТАКТЫ
+    </div>
+
+    <div style="margin-top:14px;">
+
+        <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:20px; padding:8px 0; border-bottom:1px solid #ddd;">
+            <b>Участник</b>
+            <b>Instagram</b>
+            <b>Телефон</b>
+        </div>
+
+        <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:20px; padding:9px 0; border-bottom:1px solid #ddd;">
+            <b>Аимбетов Алидар</b>
+            <span class="placeholder">ali_dar27</span>
+            <span class="placeholder">+7 777 007 77 21 </span>
+        </div>
+
+        <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:20px; padding:9px 0; border-bottom:1px solid #ddd;">
+            <b>Селезнева Анжелика</b>
+            <span class="placeholder">selezneva_angelika</span>
+            <span class="placeholder">+7 705 229 99 80 </span>
+        </div>
+
+        <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:20px; padding:9px 0; border-bottom:1px solid #ddd;">
+            <b>Сейтжапар Жанайым</b>
+            <span class="placeholder">zhanaiym_seit</span>
+            <span class="placeholder">+7 702 000 14 49</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:20px; padding:9px 0; border-bottom:1px solid #ddd;">
+            <b>Сымбат Мади</b>
+            <span class="placeholder">madishka1903</span>
+            <span class="placeholder">+7 702 254 11 16</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:20px; padding:9px 0;">
+            <b>Уманова Маргарита</b>
+            <span class="placeholder">mar_umns</span>
+            <span class="placeholder">+7 778 850 54 12</span>
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</section>
+
+</div></div>
+
+<div class="notes">
+  <button id="notesBtn">Speaker Notes</button>
+  <div class="notes-panel" id="notesPanel"><h4>Подсказка для выступления</h4><p id="notesText"></p></div>
+</div>
+
+<div class="nav">
+  <button id="prev" aria-label="Назад">←</button>
+  <div class="progress"><span id="bar"></span></div>
+  <div class="counter" id="counter">01 / 10</div>
+  <button id="next" aria-label="Вперёд">→</button>
+</div>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+let index=0;
+const bar=document.getElementById('bar');
+const counter=document.getElementById('counter');
+const notes=document.getElementById('notesText');
+const panel=document.getElementById('notesPanel');
+
+function show(i){
+  index=(i+slides.length)%slides.length;
+  slides.forEach((s,n)=>s.classList.toggle('active',n===index));
+  const pct=((index)/(slides.length-1))*100;
+  bar.style.width=pct+'%';
+  counter.textContent=String(index+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');
+  notes.textContent=slides[index].dataset.note || 'Для этого экрана заметка не добавлена.';
+  panel.classList.remove('open');
+  history.replaceState(null,'','#'+(index+1));
+}
+document.getElementById('next').onclick=()=>show(index+1);
+document.getElementById('prev').onclick=()=>show(index-1);
+document.addEventListener('keydown',e=>{
+  if(['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)){e.preventDefault();show(index+1)}
+  if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(index-1)}
+  if(e.key.toLowerCase()==='n') panel.classList.toggle('open');
+});
+document.getElementById('notesBtn').onclick=()=>panel.classList.toggle('open');
+
+let startX=0,startY=0;
+document.addEventListener('touchstart',e=>{startX=e.changedTouches[0].clientX;startY=e.changedTouches[0].clientY},{passive:true});
+document.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-startX, dy=e.changedTouches[0].clientY-startY;
+  if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)) show(index+(dx<0?1:-1));
+},{passive:true});
+
+
+
+const hash=parseInt(location.hash.slice(1));
+if(hash>=1 && hash<=slides.length) index=hash-1;
+show(index);
+</script>
+</body>
+</html>
